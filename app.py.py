@@ -49,35 +49,37 @@ def restart_game_callback():
         del st.session_state.ludo_perfect_state
 
 # 3. Token Dots Generator
-red_dots = "".join(['<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin:2px;border:1px solid white;background-color:red;box-shadow:1px 1px 3px rgba(0,0,0,0.4);"></span>' for pos in state['tokens']['🔴 Red'] if pos == 0])
-green_dots = "".join(['<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin:2px;border:2px solid white;background-color:green;box-shadow:1px 1px 3px rgba(0,0,0,0.4);"></span>' for pos in state['tokens']['🟢 Green'] if pos == 0])
-blue_dots = "".join(['<span style="display:inline-block;width:12px;height:12px;border-radius:50%;margin:2px;border:2px solid white;background-color:blue;box-shadow:1px 1px 3px rgba(0,0,0,0.4);"></span>' for pos in state['tokens']['🔵 Blue'] if pos == 0])
-yellow_dots = "".join(['<span style="display:inline-block;width:12px;height:12px;border-radius:50%;margin:2px;border:2px solid white;background-color:yellow;box-shadow:1px 1px 3px rgba(0,0,0,0.4);"></span>' for pos in state['tokens']['🟡 Yellow'] if pos == 0])
+red_dots = "".join(['<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin:2px;border:2px solid white;background-color:red;"></span>' for pos in state['tokens']['🔴 Red'] if pos == 0])
+green_dots = "".join(['<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin:2px;border:2px solid white;background-color:green;"></span>' for pos in state['tokens']['🟢 Green'] if pos == 0])
+blue_dots = "".join(['<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin:2px;border:2px solid white;background-color:blue;"></span>' for pos in state['tokens']['🔵 Blue'] if pos == 0])
+yellow_dots = "".join(['<span style="display:inline-block;width:10px;height:10px;border-radius:50%;margin:2px;border:2px solid white;background-color:yellow;"></span>' for pos in state['tokens']['🟡 Yellow'] if pos == 0])
 
-# 4. SAFE GRAPHICAL GRID (Separated Style to stop leaking)
+# 4. FIXED MATHEMATICAL 15x15 GRID LAYOUT
 html_style = """
 <style>
+    .ludo-container {
+        display: flex;
+        justify-content: center;
+        margin: 20px auto;
+    }
     .ludo-board {
         display: grid;
         grid-template-columns: repeat(15, 1fr);
         grid-template-rows: repeat(15, 1fr);
-        width: 330px;
-        height: 330px;
-        margin: 0 auto;
-        border: 4px solid #222;
+        width: 360px;
+        height: 360px;
+        border: 4px solid #333;
         background-color: #fff;
-        box-shadow: 0px 8px 20px rgba(0,0,0,0.2);
-        border-radius: 10px;
-        overflow: hidden;
     }
     .cell {
-        border: 1px solid #eee;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
+        font-size: 9px;
     }
-    .quad {
+    .home-box {
         grid-column: span 6;
         grid-row: span 6;
         display: flex;
@@ -86,59 +88,64 @@ html_style = """
         justify-content: center;
         color: white;
         font-weight: bold;
-        font-family: sans-serif;
-        font-size: 11px;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
     }
-    .hq-red { background-color: #ff4d4d; }
-    .hq-green { background-color: #2ecc71; }
-    .hq-blue { background-color: #3498db; }
-    .hq-yellow { background-color: #f1c40f; color: black; }
-    .center-tri {
+    .center-triangle {
         grid-column: span 3;
         grid-row: span 3;
         background: conic-gradient(#ff4d4d 0.25turn, #2ecc71 0.25turn 0.5turn, #f1c40f 0.5turn 0.75turn, #3498db 0.75turn);
-        border: 1px solid #222;
+        border: 1px solid #333;
     }
-    .bg-red { background-color: #ff4d4d !important; }
-    .bg-green { background-color: #2ecc71 !important; }
-    .bg-blue { background-color: #3498db !important; }
-    .bg-yellow { background-color: #f1c40f !important; }
+    /* Colors */
+    .bg-red { background-color: #ff4d4d; }
+    .bg-green { background-color: #2ecc71; }
+    .bg-yellow { background-color: #f1c40f; color: black; }
+    .bg-blue { background-color: #3498db; }
+    .star { font-size: 10px; }
 </style>
 """
 
+# 15x15 blocks sequentially sorted
 html_body = f"""
-<div class="ludo-board">
-    <div class="quad hq-red">RED HOME<br><div style="margin-top:5px;">{red_dots}</div></div>
-    <div class="cell"></div><div class="cell bg-green">⭐</div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
-    <div class="quad hq-green">GREEN HOME<br><div style="margin-top:5px;">{green_dots}</div></div>
-    
-    <div class="cell"></div><div class="cell bg-red"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-    <div class="cell bg-red">⭐</div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div>
-    <div class="cell"></div><div class="cell bg-red"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-    
-    <div class="center-tri"></div>
-    
-    <div class="cell"></div><div class="cell bg-yellow"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-    <div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-yellow">⭐</div><div class="cell bg-yellow"></div>
-    <div class="cell"></div><div class="cell bg-yellow"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-
-    <div class="quad hq-blue">BLUE HOME<br><div style="margin-top:5px;">{blue_dots}</div></div>
-    <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
-    <div class="cell">⭐</div><div class="cell bg-blue"></div><div class="cell"></div>
-    <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
-    <div class="quad hq-yellow">YELLOW HOME<br><div style="margin-top:5px;">{yellow_dots}</div></div>
+<div class="ludo-container">
+    <div class="ludo-board">
+        <div class="home-box bg-red">RED HOME<br><div>{red_dots}</div></div>
+        
+        <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
+        <div class="cell bg-blue">⭐</div><div class="cell bg-green"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-green"></div><div class="cell"></div>
+        
+        <div class="home-box bg-green">GREEN HOME<br><div>{green_dots}</div></div>
+        
+        <div class="cell"></div><div class="cell bg-red"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        <div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div><div class="cell bg-red"></div>
+        <div class="cell"></div><div class="cell bg-red">⭐</div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        
+        <div class="center-triangle"></div>
+        
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell bg-yellow">⭐</div><div class="cell"></div><div class="cell"></div>
+        <div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-yellow"></div><div class="cell bg-yellow"></div>
+        <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell bg-yellow"></div><div class="cell"></div><div class="cell"></div>
+        
+        <div class="home-box bg-blue">BLUE HOME<br><div>{blue_dots}</div></div>
+        
+        <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-blue"></div><div class="cell bg-yellow">⭐</div>
+        <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
+        <div class="cell"></div><div class="cell bg-blue"></div><div class="cell"></div>
+        
+        <div class="home-box bg-yellow" style="color:black;">YELLOW HOME<br><div>{yellow_dots}</div></div>
+    </div>
 </div>
 """
 
-components.html(html_style + html_body, height=350)
+components.html(html_style + html_body, height=390)
 st.markdown("---")
 
 # 5. CONTROLS LOGIC
